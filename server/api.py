@@ -1,9 +1,7 @@
-from dateutil import parser
 import logging
 
 from flask import Flask, abort, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash
 
 from . import config
 from .models import db, Trainer, Pokemon
@@ -19,14 +17,16 @@ db.init_app(api)
 # ++++++++++++++++++++
 @api.before_first_request
 def initialize_database():
-    # db.drop_all()
     db.create_all()
 
 
 @api.before_request
-def restrict_json_payload():
-    if not request.is_json:
-        abort(400)
+def force_json_payload():
+    if request.method in ("POST", "PUT") and not request.is_json:
+        abort(
+            400,
+            description="Requests with payload require 'Content-Type: application/json'",
+        )
 
 
 # ++++++++++++++++++++
@@ -40,24 +40,23 @@ def home():
 @api.route("/trainer", methods=["POST"])
 def create_trainer():
     if request.method != "POST":
-        api.logger.error(f"Invalid HTTP method {request.method}")
-        abort(405)
+        err_msg = f"Invalid HTTP method {request.method})"
+        api.logger.error(err_msg)
+        abort(405, description=err_msg)
 
     try:
         email = request.json["email"]
         if Trainer.query.filter_by(email=email).first() is not None:
-            api.logger.error("Existing trainer")
-            abort(400)
-
+            err_msg = "Existing trainer"
+            api.logger.error(err_msg)
+            abort(400, description=err_msg)
+        password = request.json["password"]
         name = request.json["name"]
-        password = generate_password_hash(request.json["password"])
-        birthday = parser.parse(request.json["birthday"]).date()
+        birthday = request.json["birthday"]
     except KeyError:
-        api.logger.error("Invalid or incomplete payload")
-        abort(400)
-    except Exception as e:
-        api.logger.error(e)
-        abort(400)
+        err_msg = "Invalid or incomplete payload"
+        api.logger.error(err_msg)
+        abort(400, description=err_msg)
     else:
         trainer = Trainer(name=name, email=email, password=password, birthday=birthday)
         db.session.add(trainer)
@@ -68,7 +67,11 @@ def create_trainer():
 @api.route("/trainer/<int:trainer_id>", methods=["GET", "PUT", "DELETE"])
 def handle_trainer(trainer_id):
     if request.method == "GET":
-        pass
+        trainer = Trainer.query.filter_by(id=str(trainer_id)).first()
+        if trainer is None:
+            abort(400, description=f"Trainer with id {trainer_id} not found")
+        else:
+            return jsonify(trainer.as_dict()), 200
     elif request.method == "PUT":
         pass
     elif request.method == "DELETE":

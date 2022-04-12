@@ -3,7 +3,10 @@ from typing import Optional
 import logging
 import time
 
+from dateutil import parser
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash, generate_password_hash
 import jwt
 
 from .config import SECRET_KEY
@@ -26,6 +29,18 @@ class Trainer(db.Model):
     password = db.Column(db.String(128), nullable=False)
     birthday = db.Column(db.Date, nullable=False)
     pokemon_id = db.Column(db.Integer, db.ForeignKey("pokemon.id"))
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.password = generate_password_hash(self.password)
+        self.birthday = parser.parse(self.birthday).date()
+
+    def as_dict(self):
+        return {
+            c.name: getattr(self, c.name)
+            for c in self.__table__.columns
+            if c.name != "password"
+        }
 
     def generate_token(self, expires_in: int = 3600) -> str:
         obj = {"id": self.id, "exp": time.time() + expires_in}
