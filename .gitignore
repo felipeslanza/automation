@@ -1,5 +1,6 @@
 # Custom
 *.db/
+!/.coveragerc
 
 
 # Byte-compiled / optimized / DLL files

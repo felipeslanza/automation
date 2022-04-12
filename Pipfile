@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pokebase = "*"
 flask = "*"
 flask-sqlalchemy = "*"
 flask-httpauth = "*"
@@ -14,6 +13,7 @@ python-dateutil = "*"
 
 [dev-packages]
 ipython = "*"
+coverage = "*"
 pytest = "*"
 
 [requires]
