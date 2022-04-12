@@ -1,6 +1,7 @@
 import logging
 
 from flask import Flask, abort, jsonify, request
+from flask_httpauth import HTTPBasicAuth
 from flask_sqlalchemy import SQLAlchemy
 
 from . import config
@@ -10,6 +11,7 @@ from .models import db, Trainer, Pokemon
 api = Flask(__name__)
 api.config.from_object(config)
 db.init_app(api)
+auth = HTTPBasicAuth()
 
 
 # ++++++++++++++++++++
@@ -39,11 +41,6 @@ def home():
 
 @api.route("/trainer", methods=["POST"])
 def create_trainer():
-    if request.method != "POST":
-        err_msg = f"Invalid HTTP method {request.method})"
-        api.logger.error(err_msg)
-        abort(405, description=err_msg)
-
     try:
         email = request.json["email"]
         if Trainer.query.filter_by(email=email).first() is not None:
@@ -65,14 +62,31 @@ def create_trainer():
 
 
 @api.route("/trainer/<int:trainer_id>", methods=["GET", "PUT", "DELETE"])
+@auth.login_required
 def handle_trainer(trainer_id):
+    trainer = Trainer.query.filter_by(id=str(trainer_id)).first()
+    if trainer is None:
+        abort(400, description=f"Trainer with id {trainer_id} not found")
+
     if request.method == "GET":
-        trainer = Trainer.query.filter_by(id=str(trainer_id)).first()
-        if trainer is None:
-            abort(400, description=f"Trainer with id {trainer_id} not found")
-        else:
-            return jsonify(trainer.as_dict()), 200
+        return jsonify(trainer.as_dict()), 200
     elif request.method == "PUT":
-        pass
+        trainer.update(
+            {k: v for k, v in request.json.items() if k not in ("id", "password")}
+        )
+        db.session.commit()
+        return jsonify(success=True), 200
     elif request.method == "DELETE":
-        pass
+        db.session.delete(trainer)
+        return jsonify(success=True), 200
+
+
+@api.route("/initials-pokemon", methods=["GET"])
+def pokemon_rotation():
+    pass
+
+
+@api.route("/initials-pokemon/choose", methods=["POST"])
+@auth.login_required
+def pokemon_selection():
+    pass
