@@ -1,10 +1,9 @@
-from __future__ import annotations
+from __future__ import annotations  # required for type hiting `Trainer` inside method
 from typing import Optional
 import logging
 import time
 
 from dateutil import parser
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 import jwt
@@ -46,11 +45,14 @@ class Trainer(db.Model):
         obj = {"id": self.id, "exp": time.time() + expires_in}
         return jwt.encode(obj, SECRET_KEY, algorithm="HS256")
 
-    @classmethod
+    def verify_password(self, password: str) -> bool:
+        return check_password_hash(self.password, password)
+
+    @staticmethod
     def verify_token(token: str) -> Optional[Trainer]:
         try:
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        except jwt.exceptions.DecodeError as e:
+        except (jwt.exceptions.ExpiredSignatureError, jwt.exceptions.DecodeError) as e:
             logger.error(e)
         else:
             return Trainer.query.get(data["id"])
