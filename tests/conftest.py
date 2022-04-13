@@ -1,15 +1,32 @@
 import pytest
 
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from server.api import api
+from server.models import db
 
 
 @pytest.fixture(scope="session")
-def init_test_app():
-    app = Flask("test_app")
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://test/test_db.sqlite"
-    app.config["SQLALCHEMY_COMMIT_ON_TEARDOWN"] = False
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+def setup():
+    api.config.update(
+        {
+            "TESTING": True,
+            "SQLALCHEMY_DATABASE_URI": "sqlite://",
+            "SQLALCHEMY_COMMIT_ON_TEARDOWN": False,
+            "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+        }
+    )
 
-    db = SQLAlchemy()
-    db.create_all()
+    with api.app_context():
+        db.init_app(api)
+
+
+@pytest.fixture(scope="module")
+def client(setup):
+    with api.app_context():
+        db.create_all()
+
+        client_ = api.test_client()
+        client_.db = db  # attaching `db` context for convenience
+
+        yield client_
+
+        db.drop_all()
