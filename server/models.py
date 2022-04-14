@@ -1,4 +1,4 @@
-from __future__ import annotations  # required for type hiting `Trainer` inside method
+from __future__ import annotations  # required for type hinting `Trainer` inside method
 from typing import Optional
 import logging
 import time
@@ -41,7 +41,7 @@ class Trainer(db.Model):
             if c.name != "password"
         }
 
-    def generate_token(self, expires_in: int = 3600) -> str:
+    def generate_token(self, expires_in: float = 3600) -> str:
         obj = {"id": self.id, "exp": time.time() + expires_in}
         return jwt.encode(obj, SECRET_KEY, algorithm="HS256")
 

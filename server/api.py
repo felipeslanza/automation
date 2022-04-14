@@ -3,6 +3,7 @@ from flask import Flask, abort, jsonify, request
 from . import config
 from .auth import auth
 from .models import db, Trainer, Pokemon
+from .rotation import get_random_rotation
 
 
 api = Flask(__name__)
@@ -64,9 +65,7 @@ def create_trainer():
         name = request.json["name"]
         birthday = request.json["birthday"]
     except KeyError:
-        err_msg = "Invalid or incomplete payload"
-        api.logger.error(err_msg)
-        abort(400, description=err_msg)
+        abort(400, description="Invalid or incomplete payload")
     else:
         try:
             trainer = Trainer(
@@ -77,10 +76,11 @@ def create_trainer():
             )
         except Exception as e:
             api.logger.error(e)
+            abort(400, description="Failed to create trainer")
         else:
             db.session.add(trainer)
             db.session.commit()
-            return jsonify({"token": trainer.generate_token()}), 201
+            return jsonify({"success": True, "token": trainer.generate_token()}), 201
 
 
 @api.route("/api/trainer/<int:trainer_id>", methods=["GET", "PUT", "DELETE"])
@@ -105,11 +105,34 @@ def handle_trainer(trainer_id: int):
 
 
 @api.route("/api/initials-pokemon", methods=["GET"])
+@auth.login_required
 def pokemon_rotation():
-    pass
+    trainer = auth.current_user()
+    try:
+        pokemons = get_random_rotation(config.POKEMON_ALLOWED_STARTING_TYPES)
+    except Exception as e:
+        abort(400, description="Service unavailable")
+    else:
+        trainer.last_rotation = ...
+        pokemon_obj = ...
+        return jsonify(pokemon_obj), 200
 
 
 @api.route("/api/initials-pokemon/choose", methods=["POST"])
 @auth.login_required
 def pokemon_selection():
-    pass
+    trainer = auth.current_user()
+    if not is_trainer_age_valid(trainer.birthday):
+        abort(400, description="Trainer's age must be above 14-years-old to proceed")
+
+    if not trainer.last_rotation:
+        abort(400, description="Must go through a rotation first!")
+
+    chosen = request.json["chosen_pokemon"]
+    if chosen not in trainer.last_rotation:
+        abort(400)
+
+    pokemon = Pokemon(...)
+    trainer.pokemon = pokemon
+
+    return jsonify(success=True), 201
