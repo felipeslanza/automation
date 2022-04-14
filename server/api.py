@@ -1,9 +1,12 @@
+import json
+
 from flask import Flask, abort, jsonify, request
 
 from . import config
 from .auth import auth
 from .models import db, Trainer, Pokemon
 from .rotation import get_random_rotation
+from .utils import is_trainer_age_valid
 
 
 api = Flask(__name__)
@@ -111,10 +114,11 @@ def pokemon_rotation():
     try:
         pokemons = get_random_rotation(config.POKEMON_ALLOWED_STARTING_TYPES)
     except Exception as e:
+        api.logger.error(e)
         abort(400, description="Service unavailable")
     else:
-        trainer.last_rotation = ...
-        pokemon_obj = ...
+        pokemon_obj = {p.species.id: p.name for p in pokemons}
+        trainer.last_rotation = json.dumps(pokemon_obj)
         return jsonify(pokemon_obj), 200
 
 
@@ -128,11 +132,16 @@ def pokemon_selection():
     if not trainer.last_rotation:
         abort(400, description="Must go through a rotation first!")
 
-    chosen = request.json["chosen_pokemon"]
-    if chosen not in trainer.last_rotation:
-        abort(400)
+    rotation_obj = json.loads(trainer.last_rotation)
+    species_id = request.json.get("selected_species_id")
+    if species_id is None:
+        abort(400, description="Payload missing selected pokemon")
 
-    pokemon = Pokemon(...)
+    species_id = int(species_id)
+    try:
+        pokemon = Pokemon(species_id=species_id, name=rotation_obj[species_id])
+    except KeyError:
+        abort(400, description="Must select a pokemon from the last rotation!")
     trainer.pokemon = pokemon
 
     return jsonify(success=True), 201

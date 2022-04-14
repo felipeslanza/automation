@@ -21,12 +21,19 @@ def get_first_evolutions_by_type(type_: str) -> list:
     type_ : str
         strings with valid pokemon types
     """
+
+    # +++++++++++++++++++++++++++++++++
+    # TODO: add a persistent cache here
+    # TODO: add a persistent cache here
+    # TODO: add a persistent cache here
+    # +++++++++++++++++++++++++++++++++
+
     try:
         meta = pb.type_(type_).pokemon
     except AttributeError:
         logger.error(f"Pokemon type {type_} not found!")
     else:
-        return [i for i in meta if i.pokemon.species.evolves_from_species is None]
+        return [i.pokemon for i in meta if i.pokemon.species.evolves_from_species is None]
 
 
 def get_random_rotation(types: Union[str, list[str]]) -> list:

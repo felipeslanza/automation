@@ -28,6 +28,7 @@ class Trainer(db.Model):
     password = db.Column(db.String(128), nullable=False)
     birthday = db.Column(db.Date, nullable=False)
     pokemon_id = db.Column(db.Integer, db.ForeignKey("pokemon.id"))
+    last_rotation = db.Column(db.String, nullable=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
