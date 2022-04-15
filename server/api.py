@@ -1,24 +1,23 @@
 import json
 
-from flask import Flask, abort, jsonify, request
+from flask import abort, jsonify, request
 
-from . import config
+from . import api, config
 from .auth import auth
 from .models import db, Trainer, Pokemon
-from .rotation import get_random_rotation
+from .rotation import get_random_rotation, pre_build_cache
 from .utils import is_trainer_age_valid
 
 
-api = Flask(__name__)
-api.config.from_object(config)
+# ++++++++++++++++++++
+# Setup & Hooks
+# ++++++++++++++++++++
 db.init_app(api)
 
 
-# ++++++++++++++++++++
-# Hooks
-# ++++++++++++++++++++
 @api.before_first_request
-def initialize_database():
+def pre_start_hooks():
+    pre_build_cache()
     db.create_all()
 
 
@@ -117,9 +116,8 @@ def pokemon_rotation():
         api.logger.error(e)
         abort(400, description="Service unavailable")
     else:
-        pokemon_obj = {p.species.id: p.name for p in pokemons}
-        trainer.last_rotation = json.dumps(pokemon_obj)
-        return jsonify(pokemon_obj), 200
+        trainer.last_rotation = json.dumps(pokemons)
+        return jsonify(pokemons), 200
 
 
 @api.route("/api/initials-pokemon/choose", methods=["POST"])
@@ -137,11 +135,10 @@ def pokemon_selection():
     if species_id is None:
         abort(400, description="Payload missing selected pokemon")
 
-    species_id = int(species_id)
     try:
-        pokemon = Pokemon(species_id=species_id, name=rotation_obj[species_id])
+        pokemon = Pokemon(species_id=int(species_id), name=rotation_obj[str(species_id)])
     except KeyError:
         abort(400, description="Must select a pokemon from the last rotation!")
     trainer.pokemon = pokemon
 
-    return jsonify(success=True), 201
+    return jsonify(success=True), 200

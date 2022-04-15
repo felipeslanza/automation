@@ -8,13 +8,12 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 import jwt
 
+from . import logger
 from .config import SECRET_KEY
 
 
 __all__ = ("Trainer", "Pokemon")
 
-
-logger = logging.getLogger(__name__)
 
 db = SQLAlchemy()
 

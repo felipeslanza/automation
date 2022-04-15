@@ -1,7 +1,9 @@
 from datetime import date
+from typing import Optional
+import logging
 
 
-__all__ = ("is_trainer_age_valid",)
+__all__ = "is_trainer_age_valid"
 
 
 def is_trainer_age_valid(birthday: date, thresh: int = 14 * 365) -> bool:

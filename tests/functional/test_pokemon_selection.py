@@ -45,7 +45,7 @@ def test_selection_outside_rotation_fails(client, logged_trainer):
     )
 
     assert res.status_code == 400
-    assert trainer.pokemon is None
+    assert logged_trainer.pokemon is None
 
 
 def test_selection_within_rotation_succeeds(client, logged_trainer):
@@ -58,4 +58,4 @@ def test_selection_within_rotation_succeeds(client, logged_trainer):
     )
 
     assert res.status_code == 200
-    assert trainer.pokemon
+    assert logged_trainer.pokemon
