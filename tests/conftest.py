@@ -1,12 +1,12 @@
 import pytest
 
-from server.api import api
+from server.app import app
 from server.models import db
 
 
 @pytest.fixture(scope="session")
 def setup():
-    api.config.update(
+    app.config.update(
         {
             "TESTING": True,
             "SQLALCHEMY_DATABASE_URI": "sqlite://",
@@ -15,16 +15,16 @@ def setup():
         }
     )
 
-    with api.app_context():
-        db.init_app(api)
+    with app.app_context():
+        db.init_app(app)
 
 
 @pytest.fixture(scope="module")
 def client(setup):
-    with api.app_context():
+    with app.app_context():
         db.create_all()
 
-        client_ = api.test_client()
+        client_ = app.test_client()
         client_.db = db  # attaching `db` context for convenience
 
         yield client_

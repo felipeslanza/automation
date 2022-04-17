@@ -6,15 +6,15 @@ from flask import Flask
 from . import config
 
 
-__all__ = ("api", "logger")
+__all__ = ("app", "logger")
 
 
 # +++++++++
 # App setup
 # +++++++++
-api = Flask(__name__)
-api.config.from_object(config)
-logger = api.logger
+app = Flask(__name__, static_folder="../client", static_url_path="/")
+app.config.from_object(config)
+logger = app.logger
 
 
 # ++++++++++++

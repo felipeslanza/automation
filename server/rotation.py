@@ -34,7 +34,7 @@ def get_first_evolutions_by_type(
             obj = db[type_]
             logger.debug(f"Using cached results for type [{type_}]")
         except KeyError:
-            logger.error(f"No cache found for type [{type_}], querying Pokeapi.")
+            logger.error(f"No cache found for type [{type_}], querying Pokeapp.")
             try:
                 meta = pb.type_(type_).pokemon
             except AttributeError:

@@ -7,7 +7,7 @@ LOGGING_FILEPATH = "server/out.log"  # set to empty to disable
 LOGGING_FORMAT = "%(asctime)s - %(levelname)s - %(module)s - %(message)s"
 
 # Auth
-SECRET_KEY = os.environ.get("LOFTAPI_SECRET_KEY", "testkey")
+SECRET_KEY = os.environ.get("LOFTapp_SECRET_KEY", "testkey")
 
 # Database
 SQLALCHEMY_DATABASE_URI = "sqlite:///db.sqlite"

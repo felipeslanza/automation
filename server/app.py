@@ -1,8 +1,8 @@
 import json
 
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, send_from_directory
 
-from . import api, config
+from . import app, config
 from .auth import auth
 from .models import db, Trainer, Pokemon
 from .rotation import get_random_rotation, pre_build_cache
@@ -12,16 +12,16 @@ from .utils import is_trainer_age_valid
 # ++++++++++++++++++++
 # Setup & Hooks
 # ++++++++++++++++++++
-db.init_app(api)
+db.init_app(app)
 
 
-@api.before_first_request
+@app.before_first_request
 def pre_start_hooks():
     pre_build_cache()
     db.create_all()
 
 
-@api.before_request
+@app.before_request
 def force_json_payload():
     if request.method in ("POST", "PUT") and not request.is_json:
         abort(
@@ -33,12 +33,12 @@ def force_json_payload():
 # ++++++++++++++++++++
 # Routes
 # ++++++++++++++++++++
-@api.route("/api", methods=["GET"])
-def home():
-    return "Welcome to Pokemon API"
+@app.route("/", methods=["GET"])
+def serve():
+    return send_from_directory(app.static_folder, "index.html")
 
 
-@api.route("/api/login", methods=["POST"])
+@app.route("/api/login", methods=["POST"])
 def get_token():
     try:
         email = request.json["email"]
@@ -55,13 +55,13 @@ def get_token():
     abort(401, description="Invalid credentials")
 
 
-@api.route("/api/trainer", methods=["POST"])
+@app.route("/api/trainer", methods=["POST"])
 def create_trainer():
     try:
         email = request.json["email"]
         if Trainer.query.filter_by(email=email).first() is not None:
             err_msg = "Existing trainer"
-            api.logger.error(err_msg)
+            app.logger.error(err_msg)
             abort(400, description=err_msg)
         password = request.json["password"]
         name = request.json["name"]
@@ -77,7 +77,7 @@ def create_trainer():
                 birthday=birthday,
             )
         except Exception as e:
-            api.logger.error(e)
+            app.logger.error(e)
             abort(400, description="Failed to create trainer")
         else:
             db.session.add(trainer)
@@ -85,7 +85,7 @@ def create_trainer():
             return jsonify({"success": True, "token": trainer.generate_token()}), 201
 
 
-@api.route("/api/trainer/<int:trainer_id>", methods=["GET", "PUT", "DELETE"])
+@app.route("/api/trainer/<int:trainer_id>", methods=["GET", "PUT", "DELETE"])
 @auth.login_required
 def handle_trainer(trainer_id: int):
     trainer = Trainer.query.get(trainer_id)
@@ -106,21 +106,21 @@ def handle_trainer(trainer_id: int):
         return jsonify(success=True), 200
 
 
-@api.route("/api/initials-pokemon", methods=["GET"])
+@app.route("/api/initials-pokemon", methods=["GET"])
 @auth.login_required
 def pokemon_rotation():
     trainer = auth.current_user()
     try:
         pokemons = get_random_rotation(config.POKEMON_ALLOWED_STARTING_TYPES)
     except Exception as e:
-        api.logger.error(e)
+        app.logger.error(e)
         abort(400, description="Service unavailable")
     else:
         trainer.last_rotation = json.dumps(pokemons)
         return jsonify(pokemons), 200
 
 
-@api.route("/api/initials-pokemon/choose", methods=["POST"])
+@app.route("/api/initials-pokemon/choose", methods=["POST"])
 @auth.login_required
 def pokemon_selection():
     trainer = auth.current_user()

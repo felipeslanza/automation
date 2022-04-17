@@ -1,0 +1,30 @@
+#root {
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
+.hidden {
+  display: none;
+}
+
+#signup {
+  height: 20%;
+  width: 200px;
+  background-color: #74b9ff;
+}
+
+#signup-box {
+  backoground-color: red;
+}
+
+#login-box {
+  backoground-color: blue;
+}
+
+.custom-form {
+  width: 25vw;
+  max-height: 50vh;
+  margin: 15px;
+  padding: 15px;
+}
