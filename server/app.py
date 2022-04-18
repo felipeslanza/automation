@@ -29,9 +29,6 @@ def force_json_payload():
             description="Requests with payload require 'Content-Type: application/json'",
         )
 
-    # if request.method == "POST":
-    #     breakpoint()
-
 
 # ++++++++++++++++++++
 # Routes
@@ -92,9 +89,6 @@ def create_trainer():
 @auth.login_required
 def handle_trainer():
     trainer = auth.current_user()
-    if trainer is None:
-        abort(400, description=f"Trainer with id {trainer_id} not found")
-
     if request.method == "GET":
         return jsonify(trainer.as_dict()), 200
     elif request.method == "PUT":
@@ -119,14 +113,19 @@ def pokemon_rotation():
         app.logger.error(e)
         abort(400, description="Service unavailable")
     else:
-        trainer.last_rotation = json.dumps(pokemons)
-        return jsonify(pokemons), 200
+        trainer.last_rotation = json.dumps(pokemons, sort_keys=False)
+        pokemons_arr = [(k, v) for k, v in pokemons.items()]
+        # Must return an array to preserver sorting order
+        return jsonify(pokemons_arr), 200
 
 
 @app.route("/api/initials-pokemon/choose", methods=["POST"])
 @auth.login_required
 def pokemon_selection():
     trainer = auth.current_user()
+    if trainer.pokemon_id:
+        abort(400, description="You can only select a pokemon once!")
+
     if not is_trainer_age_valid(trainer.birthday):
         abort(400, description="Trainer's age must be above 14-years-old to proceed")
 
@@ -143,5 +142,7 @@ def pokemon_selection():
     except KeyError:
         abort(400, description="Must select a pokemon from the last rotation!")
     trainer.pokemon = pokemon
+    db.session.add(pokemon)
+    db.session.commit()
 
     return jsonify(success=True), 200

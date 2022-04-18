@@ -6,8 +6,11 @@ LOGGING_LEVEL = "INFO"
 LOGGING_FILEPATH = "server/out.log"  # set to empty to disable
 LOGGING_FORMAT = f"%(asctime)s - %(levelname)s - %(module)s - %(message)s"
 
+# Flask-specific
+JSON_SORT_KEYS = False  # Must be `False` to allow relying on starting types order
+
 # Auth
-SECRET_KEY = os.environ.get("LOFTapp_SECRET_KEY", "testkey")
+SECRET_KEY = os.environ.get("LOFTAPI_SECRET_KEY", "supersafekey")
 
 # Database
 SQLALCHEMY_DATABASE_URI = "sqlite:///db.sqlite"

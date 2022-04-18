@@ -35,11 +35,14 @@ class Trainer(db.Model):
         self.birthday = parser.parse(self.birthday).date()
 
     def as_dict(self):
-        return {
+        obj = {
             c.name: getattr(self, c.name)
             for c in self.__table__.columns
             if c.name != "password"
         }
+        obj["pokemon_name"] = getattr(self.pokemon, "name", "")
+
+        return obj
 
     def generate_token(self, expires_in: float = 3600) -> str:
         obj = {"id": self.id, "exp": time.time() + expires_in}

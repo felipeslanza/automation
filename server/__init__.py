@@ -20,13 +20,17 @@ logger = app.logger
 # ++++++++++++
 # Logger setup
 # ++++++++++++
+format_ = logging.Formatter(config.LOGGING_FORMAT)
 if config.LOGGING_FILEPATH:
     file_handler = logging.FileHandler(config.LOGGING_FILEPATH)
-    file_handler.setFormatter(config.LOGGING_FORMAT)
+    file_handler.setFormatter(format_)
     logger.addHandler(file_handler)
 
+    # Add file handler to `werkzeug`
+    logging.getLogger("werkzeug").addHandler(file_handler)
+
 stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(config.LOGGING_FORMAT)
+stream_handler.setFormatter(format_)
 logger.addHandler(stream_handler)
 
 logging_level = os.environ.get("LOGGING_LEVEL", config.LOGGING_LEVEL)
