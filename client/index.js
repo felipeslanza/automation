@@ -40,15 +40,15 @@ $(document).ready(function () {
 		};
 
 		if (
-				formData.name &&
-				formData.email &&
-				formData.password &&
-				formData.birthday
+			formData.name &&
+			formData.email &&
+			formData.password &&
+			formData.birthday
 		) {
 			formData = JSON.stringify(formData);
 		} else {
 			alert("All fields are required!");
-			load_initial_view()
+			load_initial_view();
 		}
 
 		let pwd1 = form.password.value;
@@ -124,6 +124,8 @@ $(document).ready(function () {
 			contentType: "application/json; charset=utf-8",
 			error: function (e) {
 				console.error(e);
+				$("#pokemon-box").addClass("hidden");
+				load_trainer_view()
 			},
 		}).done(function (res) {
 			$("#pokemon-box").addClass("hidden");
@@ -176,6 +178,7 @@ $(document).ready(function () {
 			headers: { Authorization: `Bearer ${token}` },
 			error: function (e) {
 				console.error(e);
+				load_trainer_view();
 			},
 		}).done(function (rotation_arr) {
 			// NOTE: Order must match `server.config.POKEMON_ALLOWED_STARTING_TYPES`
