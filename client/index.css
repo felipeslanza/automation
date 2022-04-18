@@ -37,3 +37,13 @@ h1, h2 {
   margin: 15px;
   padding: 15px;
 }
+
+
+#rotation-display  {
+	display: flex-column
+}
+
+.custom-radio {
+	margin: 15px;
+	padding: 15px;
+}

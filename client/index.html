@@ -65,11 +65,7 @@
 						</div>
 						<div class="form-group">
 							<label for="password2">Confirme sua senha</label>
-							<input
-								type="password"
-								class="form-control"
-								id="password2"
-							/>
+							<input type="password" class="form-control" id="password2" />
 						</div>
 						<button id="signup-submit" type="button" class="btn btn-primary">
 							Confirmar
@@ -106,15 +102,38 @@
 					</form>
 				</div>
 
-
 				<!-- Trainer -->
 				<div id="trainer-box" class="hidden">
-						<button id="rotation-button" type="button" class="btn btn-secondary">
-							Visualizar rotação
-						</button>
-					</form>
+					<h2>Dashboard</h2>
+					<div id="trainer-display"></div>
+					<div id="pokemon-display" class="hidden"></div>
+					<button
+						id="display-selection-button"
+						type="button"
+						class="btn btn-primary"
+					>
+						Selecionar Pokemon
+					</button>
+					<button id="logout-button" type="button" class="btn btn-secondary">
+						Logout
+					</button>
 				</div>
 
+				<!-- Pokemon Rotation & Selection -->
+				<div id="pokemon-box" class="hidden">
+					<h2>Rotação de Pokemons</h2>
+					<div id="rotation-display"></div>
+					<button id="selection-submit" type="button" class="btn btn-primary">
+						Selecionar
+					</button>
+					<button
+						id="pokemon-back-button"
+						type="button"
+						class="btn btn-secondary"
+					>
+						Voltar
+					</button>
+				</div>
 			</div>
 		</div>
 	</body>
