@@ -4,7 +4,7 @@ import os
 DEBUG = True
 LOGGING_LEVEL = "INFO"
 LOGGING_FILEPATH = "server/out.log"  # set to empty to disable
-LOGGING_FORMAT = "%(asctime)s - %(levelname)s - %(module)s - %(message)s"
+LOGGING_FORMAT = f"%(asctime)s - %(levelname)s - %(module)s - %(message)s"
 
 # Auth
 SECRET_KEY = os.environ.get("LOFTapp_SECRET_KEY", "testkey")
