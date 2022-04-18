@@ -28,7 +28,7 @@ def logged_trainer(trainer):
 def test_expired_token(client, trainer):
     token = trainer.generate_token(-5)  # expired
     res = client.get(
-        f"/api/trainer/{trainer.id}",
+        "/api/trainer",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -36,13 +36,13 @@ def test_expired_token(client, trainer):
 
 
 def test_protected_routes_raise_401(client):
-    s1 = client.get("/api/trainer/1").status_code
+    s1 = client.get("/api/trainer").status_code
     s2 = client.put(
-        "/api/trainer/1",
+        "/api/trainer",
         json={"foo": "bar"},
         headers={"Authorization": "Bearer bad-token"},
     ).status_code
-    s3 = client.delete("/api/trainer/1").status_code
+    s3 = client.delete("/api/trainer").status_code
 
     assert s1 == s2 == s3 == 401
 

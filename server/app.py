@@ -88,10 +88,10 @@ def create_trainer():
             return jsonify({"success": True, "token": trainer.generate_token()}), 201
 
 
-@app.route("/api/trainer/<int:trainer_id>", methods=["GET", "PUT", "DELETE"])
+@app.route("/api/trainer", methods=["GET", "PUT", "DELETE"])
 @auth.login_required
-def handle_trainer(trainer_id: int):
-    trainer = Trainer.query.get(trainer_id)
+def handle_trainer():
+    trainer = auth.current_user()
     if trainer is None:
         abort(400, description=f"Trainer with id {trainer_id} not found")
 

@@ -40,7 +40,7 @@ def test_new_trainer_post(client, post_trainer_data):
 
 def test_handle_trainer_get_method(client, logged_trainer):
     res = client.get(
-        f"/api/trainer/{logged_trainer.id}",
+        "/api/trainer",
         headers={"Authorization": f"Bearer {logged_trainer.token}"},
     )
 
@@ -51,7 +51,7 @@ def test_handle_trainer_get_method(client, logged_trainer):
 def test_handle_trainer_put_method(client, logged_trainer):
     pre = logged_trainer.email
     res = client.put(
-        f"/api/trainer/{logged_trainer.id}",
+        "/api/trainer",
         json=dict(email="x@x.co"),
         headers={"Authorization": f"Bearer {logged_trainer.token}"},
     )
@@ -62,7 +62,7 @@ def test_handle_trainer_put_method(client, logged_trainer):
 
 def test_handle_trainer_del_method(client, logged_trainer):
     res = client.delete(
-        f"/api/trainer/{logged_trainer.id}",
+        "/api/trainer",
         headers={"Authorization": f"Bearer {logged_trainer.token}"},
     )
     assert res.status_code == 200
