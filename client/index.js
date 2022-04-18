@@ -32,18 +32,31 @@ $(document).ready(function () {
 
 	$("#signup-submit").click(function () {
 		let form = $("#signup-box form")[0];
+		let formData = {
+			name: form.name.value,
+			email: form.email.value,
+			password: form.password.value,
+			birthday: form.birthday.value,
+		};
+
+		if (
+				formData.name &&
+				formData.email &&
+				formData.password &&
+				formData.birthday
+		) {
+			formData = JSON.stringify(formData);
+		} else {
+			alert("All fields are required!");
+			load_initial_view()
+		}
+
 		let pwd1 = form.password.value;
 		let pwd2 = form.password2.value;
 		if (pwd1 != pwd2) {
 			alert("Passwords must match!");
 			return;
 		}
-		let formData = JSON.stringify({
-			name: form.name.value,
-			email: form.email.value,
-			password: form.password.value,
-			birthday: form.birthday.value,
-		});
 
 		$.ajax({
 			type: "POST",
@@ -54,6 +67,7 @@ $(document).ready(function () {
 			error: function (e) {
 				console.log("Failed to create new trainer");
 				console.error(e);
+				load_initial_view(); // Reset
 			},
 		}).done(function (res) {
 			let token = res["token"];
@@ -78,7 +92,8 @@ $(document).ready(function () {
 			dataType: "json",
 			contentType: "application/json; charset=utf-8",
 			error: function (e) {
-				console.error(e);
+				alert("Invalid credentials");
+				load_initial_view();
 			},
 		}).done(function (res) {
 			let token = res["token"];
